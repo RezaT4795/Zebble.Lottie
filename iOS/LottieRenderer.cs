@@ -4,7 +4,7 @@
     using System.Threading.Tasks;
     using UIKit;
     using Zebble.Device;
-
+    
     [EditorBrowsable(EditorBrowsableState.Never)]
     partial class LottieRenderer : INativeRenderer
     {
