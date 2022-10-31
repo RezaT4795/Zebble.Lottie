@@ -1,19 +1,51 @@
-﻿namespace Zebble
+﻿namespace Zebble.Lottie
 {
     using System;
     using System.Threading.Tasks;
     using Windows.UI.Xaml;
+    using Microsoft.Toolkit.Uwp.UI.Lottie;
+    using Zebble.Device;
+    using System.IO;
+    using Microsoft.UI.Xaml.Controls;
+    using System.Diagnostics;
+    using Windows.Storage;
+    using System.Text;
 
-    class LottieRenderer : INativeRenderer
+    public class LottieRenderer : INativeRenderer
     {
-        public Task<FrameworkElement> Render(Renderer renderer)
+        AnimatedVisualPlayer Player;
+        LottieView View;
+        LottieVisualSource Source;
+        public async Task<FrameworkElement> Render(Renderer renderer)
         {
-            Device.Log.Error("Lottie plugin not works on UWP");
-            throw new Exception("Lottie plugin not works on UWP");
+            Player = new AnimatedVisualPlayer();
+            View = (LottieView)renderer.View;
+            try
+            {
+                Source = LottieVisualSource.CreateFromString($@"ms-appx:///Resources/{View.AnimationJsonFile}");
+                Player.Source = Source;
+            }
+            catch (Exception ex)
+            {
+                await Alert.Toast("Failed: " + ex.Message);
+            }
+
+            View.OnPlay.Handle(async () => await Player.PlayAsync(View.From, View.To, View.Loop));
+            View.OnPause.Handle(() => Player.Pause());
+            View.OnResume.Handle(() => Player.Resume());
+            View.OnPropertyChanged.Handle(async () =>
+            {
+                Player.PlaybackRate = View.PlayBackRate;
+                await Player.PlayAsync(View.From, View.To, View.Loop);
+            });
+            //Player.AutoPlay = false;
+            return await Task.FromResult(Player);
         }
 
         public void Dispose()
         {
+            Player = null;
+            View = null;
         }
     }
 }

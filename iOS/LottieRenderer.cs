@@ -1,33 +1,54 @@
-﻿namespace Zebble
+﻿namespace Zebble.Lottie
 {
     using System.ComponentModel;
     using System.Threading.Tasks;
     using UIKit;
     using Zebble.Device;
-    
+    using Airbnb.Lottie;
+
     [EditorBrowsable(EditorBrowsableState.Never)]
     partial class LottieRenderer : INativeRenderer
     {
-        Airbnb.Lottie.LOTAnimationView Result;
-        Lottie View;
+        private LOTAnimationView Player;
+        private LottieView View;
 
         public Task<UIView> Render(Renderer renderer)
         {
-            if (Result == null)
+            if (Player == null)
             {
-                View = (Lottie)renderer.View;
+                View = (LottieView)renderer.View;
                 var info = IO.File(View.AnimationJsonFile);
 
-                Result = Airbnb.Lottie.LOTAnimationView.AnimationWithFilePath(info.FullName);
+                Player = LOTAnimationView.AnimationWithFilePath(info.FullName);
+                Player.Play();
             }
 
-            View.OnPlay.Handle(() => Result.Play());
-            View.OnPause.Handle(() => Result.Pause());
-            View.OnLoopChanged.Handle((loop) => Result.LoopAnimation = loop);
+            // AnimationSpeed = PlayBackRate, LoopAnimation=Loop, PlayFromProgress, Stop
 
-            return Task.FromResult<UIView>(Result);
+            View.OnPlay.Handle(() => Player.Play());
+            View.OnPause.Handle(() => Player.Pause());
+            View.OnResume.Handle(() => Player.PlayWithCompletion(AnimationCompletionBlock));
+            View.OnPropertyChanged.Handle(() =>
+            {
+                Player.AnimationSpeed = View.PlayBackRate;
+                Player.PlayFromProgress(View.From, View.To, AnimationCompletionBlock);
+            });
+
+
+            return Task.FromResult<UIView>(Player);
         }
 
-        public void Dispose() => Result.Dispose();
+        private void AnimationCompletionBlock(bool animationFinished)
+        {
+            if (animationFinished)
+            {
+                if (View.Loop)
+                    Player.PlayWithCompletion(AnimationCompletionBlock);
+                else
+                    Player.Stop();
+            }
+        }
+
+        public void Dispose() => Player.Dispose();
     }
 }
