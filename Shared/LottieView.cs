@@ -10,20 +10,10 @@
         internal AsyncEvent OnResume = new AsyncEvent();
         internal AsyncEvent OnPropertyChanged = new AsyncEvent();
 
+        public LottieView() { }
 
-
-        private string animationJsonFile;
-        public string AnimationJsonFile { get => animationJsonFile; set => SetAnimationJsonFile(value); }
-        private async void SetAnimationJsonFile(string value)
-        {
-#if ANDROID
-            animationJsonFile="Android.Resources." + value;
-#else
-            animationJsonFile = value;
-#endif
-            await Render();
-        }
-
+        public string AnimationJsonFile { get; set; }
+        
         private bool loop = true;
         public bool Loop { get => loop; set => SetLoop(value); }
         private async void SetLoop(bool value)
@@ -68,12 +58,5 @@
         public void Pause() => OnPause.RaiseOn(Thread.UI);
         public void Play() => OnPlay.RaiseOn(Thread.UI);
         public void Resume() => OnResume.RaiseOn(Thread.UI);
-
-
-        public LottieView() 
-            {
-            
-            }
-
     }
 }

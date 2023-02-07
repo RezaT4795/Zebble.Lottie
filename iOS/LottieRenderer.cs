@@ -18,7 +18,6 @@
             {
                 View = (LottieView)renderer.View;
                 var info = IO.File(View.AnimationJsonFile);
-
                 Player = LOTAnimationView.AnimationWithFilePath(info.FullName);
                 Player.Play();
             }
