@@ -3,29 +3,31 @@
 #if ANDROID
     [Android.Runtime.Preserve]
 #endif
-    public partial class LottieView : View, IRenderedBy<LottieRenderer>
+    public class LottieView : View, IRenderedBy<LottieRenderer>
     {
-        internal AsyncEvent OnPlay = new AsyncEvent();
-        internal AsyncEvent OnPause = new AsyncEvent();
-        internal AsyncEvent OnResume = new AsyncEvent();
-        internal AsyncEvent OnPropertyChanged = new AsyncEvent();
+        internal AsyncEvent OnPlay = new();
+        internal AsyncEvent OnPause = new();
+        internal AsyncEvent OnResume = new();
+        internal AsyncEvent OnPropertyChanged = new();
 
         public LottieView() { }
 
         public string AnimationJsonFile { get; set; }
-        
-        private bool loop = true;
+
+        bool loop = true;
         public bool Loop { get => loop; set => SetLoop(value); }
-        private async void SetLoop(bool value)
+
+        async void SetLoop(bool value)
         {
             if (value == loop) return;
             loop = value;
             await OnPropertyChanged.RaiseOn(Thread.UI);
         }
 
-        private float from = 0;
+        float from = 0;
         public float From { get => from; set => SetFrom(value); }
-        private async void SetFrom(float value)
+
+        async void SetFrom(float value)
         {
             if (value == from) return;
             if (value > 1.0) value = 1;
@@ -35,9 +37,10 @@
             await OnPropertyChanged.RaiseOn(Thread.UI);
         }
 
-        private float to = 1;
+        float to = 1;
         public float To { get => to; set => SetTo(value); }
-        private async void SetTo(float value)
+
+        async void SetTo(float value)
         {
             if (value == to) return;
             if (value > 1.0) value = 1;
@@ -47,9 +50,10 @@
             await OnPropertyChanged.RaiseOn(Thread.UI);
         }
 
-        private float playBackRate = 1;
+        float playBackRate = 1;
         public float PlayBackRate { get => playBackRate; set => SetPlayBackRate(value); }
-        private async void SetPlayBackRate(float value)
+
+        async void SetPlayBackRate(float value)
         {
             if (value == playBackRate) return;
             playBackRate = value;

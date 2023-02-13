@@ -11,7 +11,7 @@
 
     [Preserve]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    partial class LottieRenderer : INativeRenderer
+    class LottieRenderer : INativeRenderer
     {
         LottieAnimationView Player;
         LottieView View;
@@ -20,15 +20,15 @@
         {
             View = (LottieView)renderer.View;
 
-            Player = new LottieAnimationView(UIRuntime.CurrentActivity);
-            Player.SetAnimationFromJson(Device.IO.File(View.AnimationJsonFile).ReadAllText(), View.AnimationJsonFile);
+            Player = new(UIRuntime.CurrentActivity);
+            Player.SetAnimationFromJson(await Device.IO.File(View.AnimationJsonFile).ReadAllTextAsync(), View.AnimationJsonFile);
             if (View.Loop) Player.RepeatCount = ValueAnimator.Infinite;
 
             View.OnPlay.Handle(() => Player?.PlayAnimation());
             View.OnPause.Handle(() => Player?.PauseAnimation());
             View.OnResume.Handle(() => Player?.ResumeAnimation());
             View.OnPropertyChanged.Handle(OnPropertyChanged);
-
+            
             try { Player.PlayAnimation(); }
             catch (Exception ex) { Debug.WriteLine(ex.Message); }
 
@@ -43,7 +43,7 @@
                 Player.Speed = View.PlayBackRate;
                 Player.SetMinProgress(View.From);
                 Player.SetMaxProgress(View.To);
-                Player.RepeatCount = View.Loop ? 1 : 0;
+                Player.RepeatCount = View.Loop ? ValueAnimator.Infinite : 0;
                 Player.PlayAnimation();
             }
             catch (Exception ex)

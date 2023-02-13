@@ -7,10 +7,10 @@
     using Airbnb.Lottie;
 
     [EditorBrowsable(EditorBrowsableState.Never)]
-    partial class LottieRenderer : INativeRenderer
+    class LottieRenderer : INativeRenderer
     {
-        private LOTAnimationView Player;
-        private LottieView View;
+        LOTAnimationView Player;
+        LottieView View;
 
         public Task<UIView> Render(Renderer renderer)
         {
@@ -19,11 +19,8 @@
                 View = (LottieView)renderer.View;
                 var info = IO.File(View.AnimationJsonFile);
                 Player = LOTAnimationView.AnimationWithFilePath(info.FullName);
-                Player.Play();
             }
-
-            // AnimationSpeed = PlayBackRate, LoopAnimation=Loop, PlayFromProgress, Stop
-
+            
             View.OnPlay.Handle(() => Player.Play());
             View.OnPause.Handle(() => Player.Pause());
             View.OnResume.Handle(() => Player.PlayWithCompletion(AnimationCompletionBlock));
@@ -33,11 +30,15 @@
                 Player.PlayFromProgress(View.From, View.To, AnimationCompletionBlock);
             });
 
+            if (View.Loop)
+                Player.PlayWithCompletion(AnimationCompletionBlock);
+            else
+                Player.Play();
 
             return Task.FromResult<UIView>(Player);
         }
 
-        private void AnimationCompletionBlock(bool animationFinished)
+        void AnimationCompletionBlock(bool animationFinished)
         {
             if (animationFinished)
             {
