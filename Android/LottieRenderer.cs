@@ -19,9 +19,9 @@
         public async Task<Android.Views.View> Render(Renderer renderer)
         {
             View = (LottieView)renderer.View;
-
+            
             Player = new(UIRuntime.CurrentActivity);
-            Player.SetAnimationFromJson(await Device.IO.File(View.AnimationJsonFile).ReadAllTextAsync(), View.AnimationJsonFile);
+            Player.SetAnimationFromJson(Device.IO.File(View.AnimationJsonFile).ReadAllText(), View.AnimationJsonFile);
             if (View.Loop) Player.RepeatCount = ValueAnimator.Infinite;
 
             View.OnPlay.Handle(() => Player?.PlayAnimation());
