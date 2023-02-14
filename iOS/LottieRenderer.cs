@@ -19,8 +19,9 @@
                 View = (LottieView)renderer.View;
                 var info = IO.File(View.AnimationJsonFile);
                 Player = LOTAnimationView.AnimationWithFilePath(info.FullName);
+                Player.ContentMode = UIViewContentMode.ScaleAspectFit;
             }
-            
+
             View.OnPlay.Handle(() => Player.Play());
             View.OnPause.Handle(() => Player.Pause());
             View.OnResume.Handle(() => Player.PlayWithCompletion(AnimationCompletionBlock));
