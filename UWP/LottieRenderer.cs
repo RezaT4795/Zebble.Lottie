@@ -5,6 +5,8 @@
     using Windows.UI.Xaml;
     using Microsoft.Toolkit.Uwp.UI.Lottie;
     using Microsoft.UI.Xaml.Controls;
+    using Windows.Storage.Streams;
+    using Olive;
 
     public class LottieRenderer : INativeRenderer
     {
@@ -19,7 +21,11 @@
 
             try
             {
-                Source = LottieVisualSource.CreateFromString($@"ms-appx:///Resources/{View.AnimationJsonFile}");
+                Source = new();
+
+                if (View.AnimationJsonString.HasValue()) Source.SetSourceAsync(await CreateJsonStream(View.AnimationJsonString));
+                else Source.SetSourceAsync($@"ms-appx:///Resources/{View.AnimationJsonFile}".AsUri());
+                
                 Player.Source = Source;
             }
             catch (Exception ex)
@@ -38,6 +44,26 @@
             });
 
             return await Task.FromResult(Player);
+        }
+
+        static async Task<IInputStream> CreateJsonStream(string jsonString)
+        {
+            using var stream = new InMemoryRandomAccessStream();
+
+            using (var dataWriter = new DataWriter(stream))
+            {
+                dataWriter.UnicodeEncoding = UnicodeEncoding.Utf8;
+                dataWriter.ByteOrder = ByteOrder.LittleEndian;
+
+                dataWriter.WriteString(jsonString);
+
+                await dataWriter.StoreAsync();
+                await dataWriter.FlushAsync();
+
+                dataWriter.DetachStream();
+            }
+
+            return stream.GetInputStreamAt(0);
         }
 
         public void Dispose()

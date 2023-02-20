@@ -13,6 +13,7 @@
         public LottieView() { }
 
         public string AnimationJsonFile { get; set; }
+        public string AnimationJsonString { get; set; }
 
         bool loop = true;
         public bool Loop { get => loop; set => SetLoop(value); }

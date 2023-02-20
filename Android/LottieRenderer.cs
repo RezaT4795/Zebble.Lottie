@@ -19,16 +19,19 @@
         public async Task<Android.Views.View> Render(Renderer renderer)
         {
             View = (LottieView)renderer.View;
-            
+
             Player = new(UIRuntime.CurrentActivity);
-            Player.SetAnimationFromJson(Device.IO.File(View.AnimationJsonFile).ReadAllText(), View.AnimationJsonFile);
+
+            if (View.AnimationJsonString.HasValue()) Player.SetAnimationFromJson(View.AnimationJsonString, View.AnimationJsonString.CreateMD5Hash());
+            else Player.SetAnimationFromJson(Device.IO.File(View.AnimationJsonFile).ReadAllText(), View.AnimationJsonFile);
+
             if (View.Loop) Player.RepeatCount = ValueAnimator.Infinite;
 
             View.OnPlay.Handle(() => Player?.PlayAnimation());
             View.OnPause.Handle(() => Player?.PauseAnimation());
             View.OnResume.Handle(() => Player?.ResumeAnimation());
             View.OnPropertyChanged.Handle(OnPropertyChanged);
-            
+
             try { Player.PlayAnimation(); }
             catch (Exception ex) { Debug.WriteLine(ex.Message); }
 

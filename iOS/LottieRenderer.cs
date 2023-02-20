@@ -1,4 +1,7 @@
-﻿namespace Zebble
+﻿using Foundation;
+using Olive;
+
+namespace Zebble
 {
     using System.ComponentModel;
     using System.Threading.Tasks;
@@ -17,8 +20,15 @@
             if (Player == null)
             {
                 View = (LottieView)renderer.View;
-                var info = IO.File(View.AnimationJsonFile);
-                Player = LOTAnimationView.AnimationWithFilePath(info.FullName);
+
+                if (View.AnimationJsonString.HasValue())
+                {
+                    var data = NSData.FromString(View.AnimationJsonString);
+                    var dictionary = (NSDictionary)NSJsonSerialization.Deserialize(data, 0, out _);
+                    Player = LOTAnimationView.AnimationFromJSON(dictionary);
+                }
+                else Player = LOTAnimationView.AnimationWithFilePath(IO.File(View.AnimationJsonFile).FullName);
+
                 Player.ContentMode = UIViewContentMode.ScaleAspectFit;
             }
 
