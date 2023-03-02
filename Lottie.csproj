@@ -1,12 +1,12 @@
-﻿<Project Sdk="MSBuild.Sdk.Extras/3.0.23">
+﻿<Project Sdk="MSBuild.Sdk.Extras/3.0.44">
   <PropertyGroup>
-    <TargetFrameworks>Xamarin.iOS10;MonoAndroid12.0</TargetFrameworks>
+    <TargetFrameworks>Xamarin.iOS10;MonoAndroid13.0</TargetFrameworks>
     <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">$(TargetFrameworks);uap10.0.18362</TargetFrameworks>
     <AssemblyName>Zebble.Lottie</AssemblyName>
     <RootNamespace>Zebble</RootNamespace>
     <PackageId>Zebble.Lottie</PackageId>
     <Product>$(AssemblyName) ($(TargetFramework))</Product>
-    <Version>1.1.110.0</Version>
+    <Version>1.1.111.0</Version>
     <PackOnBuild>true</PackOnBuild>
     <NeutralLanguage>en</NeutralLanguage>
     <DefineConstants>$(DefineConstants)</DefineConstants>
@@ -45,10 +45,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|Xamarin.iOS10|AnyCPU'">
     <DebugType>portable</DebugType>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|MonoAndroid90|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|MonoAndroid13.0|AnyCPU'">
     <DebugType>embedded</DebugType>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|MonoAndroid90|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|MonoAndroid13.0|AnyCPU'">
     <DebugType>embedded</DebugType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|uap10.0.18362|AnyCPU'">
