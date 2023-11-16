@@ -30,7 +30,7 @@
             }
             catch (Exception ex)
             {
-                await Alert.Toast("Failed: " + ex.Message);
+                await Dialogs.Current.Toast("Failed: " + ex.Message);
             }
 
             View.OnPlay.Handle(async () => await Player.PlayAsync(View.From, View.To, View.Loop));
