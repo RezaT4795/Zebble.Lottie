@@ -1,5 +1,8 @@
 ﻿namespace Zebble
 {
+    using Zebble.Device;
+    using SKAnimation = SkiaSharp.Skottie.Animation;
+
 #if ANDROID
     [Android.Runtime.Preserve]
 #endif
@@ -8,58 +11,14 @@
         internal AsyncEvent OnPlay = new();
         internal AsyncEvent OnPause = new();
         internal AsyncEvent OnResume = new();
-        internal AsyncEvent OnPropertyChanged = new();
+        internal SKAnimation Animation;
 
-        public LottieView() { }
+        public string AnimationJsonFile { set => Animation = SKAnimation.Create(IO.File(value).FullName); }
 
-        public string AnimationJsonFile { get; set; }
-        public string AnimationJsonString { get; set; }
+        public string AnimationJsonString { set => Animation = SKAnimation.Parse(value); }
 
-        bool loop = true;
-        public bool Loop { get => loop; set => SetLoop(value); }
+        public bool Loop { get; set; } = true;
 
-        async void SetLoop(bool value)
-        {
-            if (value == loop) return;
-            loop = value;
-            await OnPropertyChanged.RaiseOn(Thread.UI);
-        }
-
-        float from = 0;
-        public float From { get => from; set => SetFrom(value); }
-
-        async void SetFrom(float value)
-        {
-            if (value == from) return;
-            if (value > 1.0) value = 1;
-            if (value < 0.0) value = 0;
-            if (value > to) value = to;
-            from = value;
-            await OnPropertyChanged.RaiseOn(Thread.UI);
-        }
-
-        float to = 1;
-        public float To { get => to; set => SetTo(value); }
-
-        async void SetTo(float value)
-        {
-            if (value == to) return;
-            if (value > 1.0) value = 1;
-            if (value < 0.0) value = 0;
-            if (value < from) value = from;
-            to = value;
-            await OnPropertyChanged.RaiseOn(Thread.UI);
-        }
-
-        float playBackRate = 1;
-        public float PlayBackRate { get => playBackRate; set => SetPlayBackRate(value); }
-
-        async void SetPlayBackRate(float value)
-        {
-            if (value == playBackRate) return;
-            playBackRate = value;
-            await OnPropertyChanged.RaiseOn(Thread.UI);
-        }
         public void Pause() => OnPause.RaiseOn(Thread.UI);
         public void Play() => OnPlay.RaiseOn(Thread.UI);
         public void Resume() => OnResume.RaiseOn(Thread.UI);

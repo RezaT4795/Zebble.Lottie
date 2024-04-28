@@ -1,75 +1,76 @@
 ﻿namespace Zebble
 {
-    using System;
+    using System.ComponentModel;
     using System.Threading.Tasks;
-    using Windows.UI.Xaml;
-    using Microsoft.Toolkit.Uwp.UI.Lottie;
-    using Microsoft.UI.Xaml.Controls;
-    using Windows.Storage.Streams;
-    using Olive;
+    using PlatformView = Windows.UI.Xaml.FrameworkElement;
+    using SkiaSharp.Views.UWP;
+    using SKAnimation = SkiaSharp.Skottie.Animation;
+    using System;
 
-    public class LottieRenderer : INativeRenderer
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    class LottieRenderer : INativeRenderer
     {
-        AnimatedVisualPlayer Player;
+        SKAnimation Animation;
+        LottiePlayer Player;
         LottieView View;
-        LottieVisualSource Source;
 
-        public async Task<FrameworkElement> Render(Renderer renderer)
+        public Task<PlatformView> Render(Renderer renderer)
         {
-            Player = new();
             View = (LottieView)renderer.View;
+            Player = new LottiePlayer(View.Animation, OnSeek);
 
-            try
-            {
-                Source = new();
-
-                if (View.AnimationJsonString.HasValue()) Source.SetSourceAsync(await CreateJsonStream(View.AnimationJsonString));
-                else Source.SetSourceAsync($@"ms-appx:///Resources/{View.AnimationJsonFile}".AsUri());
-                
-                Player.Source = Source;
-            }
-            catch (Exception ex)
-            {
-                await Dialogs.Current.Toast("Failed: " + ex.Message);
-            }
-
-            View.OnPlay.Handle(async () => await Player.PlayAsync(View.From, View.To, View.Loop));
+            View.OnPlay.Handle(() => Player.Play());
             View.OnPause.Handle(() => Player.Pause());
             View.OnResume.Handle(() => Player.Resume());
 
-            View.OnPropertyChanged.Handle(async () =>
-            {
-                Player.PlaybackRate = View.PlayBackRate;
-                await Player.PlayAsync(View.From, View.To, View.Loop);
-            });
+            Player.Play();
 
-            return await Task.FromResult(Player);
+            return Task.FromResult<PlatformView>(Player);
         }
 
-        static async Task<IInputStream> CreateJsonStream(string jsonString)
+        void OnSeek(bool animationFinished)
         {
-            using var stream = new InMemoryRandomAccessStream();
+            if (animationFinished == false) return;
 
-            using (var dataWriter = new DataWriter(stream))
-            {
-                dataWriter.UnicodeEncoding = UnicodeEncoding.Utf8;
-                dataWriter.ByteOrder = ByteOrder.LittleEndian;
-
-                dataWriter.WriteString(jsonString);
-
-                await dataWriter.StoreAsync();
-                await dataWriter.FlushAsync();
-
-                dataWriter.DetachStream();
-            }
-
-            return stream.GetInputStreamAt(0);
+            if (View.Loop) Player.Play();
+            else Player.Stop();
         }
 
         public void Dispose()
         {
+            Animation?.Dispose();
+            Animation = null;
+
+            Player?.Dispose();
             Player = null;
-            View = null;
+        }
+
+        class LottiePlayer : SKXamlCanvas
+        {
+            LottieAnimationController Controller;
+
+            public LottiePlayer(SKAnimation animation, Action<bool> onSeek)
+                => Controller = new(animation, Invalidate, onSeek);
+
+            public void Play() => Controller.Play();
+
+            public void Pause() => Controller.Pause();
+
+            public void Resume() => Controller.Resume();
+
+            public void Stop() => Controller.Stop();
+
+            protected override void OnPaintSurface(SKPaintSurfaceEventArgs e)
+            {
+                base.OnPaintSurface(e);
+                Controller.Render(e.Surface.Canvas, e.Info.Rect);
+            }
+
+            public void Dispose()
+            {
+                Controller?.Dispose();
+                Controller = null;
+            }
         }
     }
 }

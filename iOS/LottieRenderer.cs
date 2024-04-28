@@ -1,65 +1,77 @@
-﻿using Foundation;
-using Olive;
-
-namespace Zebble
+﻿namespace Zebble
 {
     using System.ComponentModel;
     using System.Threading.Tasks;
-    using UIKit;
-    using Zebble.Device;
-    using Airbnb.Lottie;
+    using PlatformView = UIKit.UIView;
+    using SkiaSharp.Views.iOS;
+    using SKAnimation = SkiaSharp.Skottie.Animation;
+    using System;
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     class LottieRenderer : INativeRenderer
     {
-        LOTAnimationView Player;
+        SKAnimation Animation;
+        LottiePlayer Player;
         LottieView View;
 
-        public Task<UIView> Render(Renderer renderer)
+        public Task<PlatformView> Render(Renderer renderer)
         {
-            if (Player == null)
-            {
-                View = (LottieView)renderer.View;
-
-                if (View.AnimationJsonString.HasValue())
-                {
-                    var data = NSData.FromString(View.AnimationJsonString);
-                    var dictionary = (NSDictionary)NSJsonSerialization.Deserialize(data, 0, out _);
-                    Player = LOTAnimationView.AnimationFromJSON(dictionary);
-                }
-                else Player = LOTAnimationView.AnimationWithFilePath(IO.File(View.AnimationJsonFile).FullName);
-
-                Player.ContentMode = UIViewContentMode.ScaleAspectFit;
-            }
+            View = (LottieView)renderer.View;
+            Player = new LottiePlayer(View.Animation, OnSeek);
 
             View.OnPlay.Handle(() => Player.Play());
             View.OnPause.Handle(() => Player.Pause());
-            View.OnResume.Handle(() => Player.PlayWithCompletion(AnimationCompletionBlock));
-            View.OnPropertyChanged.Handle(() =>
-            {
-                Player.AnimationSpeed = View.PlayBackRate;
-                Player.PlayFromProgress(View.From, View.To, AnimationCompletionBlock);
-            });
+            View.OnResume.Handle(() => Player.Resume());
 
-            if (View.Loop)
-                Player.PlayWithCompletion(AnimationCompletionBlock);
-            else
-                Player.Play();
+            Player.Play();
 
-            return Task.FromResult<UIView>(Player);
+            return Task.FromResult<PlatformView>(Player);
         }
 
-        void AnimationCompletionBlock(bool animationFinished)
+        void OnSeek(bool animationFinished)
         {
-            if (animationFinished)
+            if (animationFinished == false) return;
+
+            if (View.Loop) Player.Play();
+            else Player.Stop();
+        }
+
+        public void Dispose()
+        {
+            Animation?.Dispose();
+            Animation = null;
+
+            Player?.Dispose();
+            Player = null;
+        }
+
+        class LottiePlayer : SKCanvasView
+        {
+            LottieAnimationController Controller;
+
+            public LottiePlayer(SKAnimation animation, Action<bool> onSeek)
+                => Controller = new(animation, SetNeedsDisplay, onSeek);
+
+            public void Play() => Controller.Play();
+
+            public void Pause() => Controller.Pause();
+
+            public void Resume() => Controller.Resume();
+
+            public void Stop() => Controller.Stop();
+
+            protected override void OnPaintSurface(SKPaintSurfaceEventArgs e)
             {
-                if (View.Loop)
-                    Player.PlayWithCompletion(AnimationCompletionBlock);
-                else
-                    Player.Stop();
+                base.OnPaintSurface(e);
+                Controller.Render(e.Surface.Canvas, e.Info.Rect);
+            }
+
+            protected override void Dispose(bool disposing)
+            {
+                base.Dispose(disposing);
+                Controller?.Dispose();
+                Controller = null;
             }
         }
-
-        public void Dispose() => Player.Dispose();
     }
 }

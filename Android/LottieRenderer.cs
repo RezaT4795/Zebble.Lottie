@@ -1,64 +1,77 @@
 ﻿namespace Zebble
 {
-    using System;
     using System.ComponentModel;
-    using System.Diagnostics;
     using System.Threading.Tasks;
-    using Android.Animation;
-    using Android.Runtime;
-    using Com.Airbnb.Lottie;
-    using Olive;
+    using PlatformView = Android.Views.View;
+    using SkiaSharp.Views.Android;
+    using SKAnimation = SkiaSharp.Skottie.Animation;
+    using System;
 
-    [Preserve]
     [EditorBrowsable(EditorBrowsableState.Never)]
     class LottieRenderer : INativeRenderer
     {
-        LottieAnimationView Player;
+        SKAnimation Animation;
+        LottiePlayer Player;
         LottieView View;
 
-        public async Task<Android.Views.View> Render(Renderer renderer)
+        public Task<PlatformView> Render(Renderer renderer)
         {
             View = (LottieView)renderer.View;
+            Player = new LottiePlayer(View.Animation, OnSeek);
 
-            Player = new(UIRuntime.CurrentActivity);
+            View.OnPlay.Handle(() => Player.Play());
+            View.OnPause.Handle(() => Player.Pause());
+            View.OnResume.Handle(() => Player.Resume());
 
-            if (View.AnimationJsonString.HasValue()) Player.SetAnimationFromJson(View.AnimationJsonString, View.AnimationJsonString.CreateMD5Hash());
-            else Player.SetAnimationFromJson(Device.IO.File(View.AnimationJsonFile).ReadAllText(), View.AnimationJsonFile);
+            Player.Play();
 
-            if (View.Loop) Player.RepeatCount = ValueAnimator.Infinite;
-
-            View.OnPlay.Handle(() => Player?.PlayAnimation());
-            View.OnPause.Handle(() => Player?.PauseAnimation());
-            View.OnResume.Handle(() => Player?.ResumeAnimation());
-            View.OnPropertyChanged.Handle(OnPropertyChanged);
-
-            try { Player.PlayAnimation(); }
-            catch (Exception ex) { Debug.WriteLine(ex.Message); }
-
-            return Player;
+            return Task.FromResult<PlatformView>(Player);
         }
 
-        void OnPropertyChanged()
+        void OnSeek(bool animationFinished)
         {
-            try
-            {
-                if (Player == null) return;
-                Player.Speed = View.PlayBackRate;
-                Player.SetMinProgress(View.From);
-                Player.SetMaxProgress(View.To);
-                Player.RepeatCount = View.Loop ? ValueAnimator.Infinite : 0;
-                Player.PlayAnimation();
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
-            }
+            if (animationFinished == false) return;
+
+            if (View.Loop) Player.Play();
+            else Player.Stop();
         }
 
         public void Dispose()
         {
+            Animation?.Dispose();
+            Animation = null;
+
             Player?.Dispose();
             Player = null;
+        }
+
+        class LottiePlayer : SKCanvasView
+        {
+            LottieAnimationController Controller;
+
+            public LottiePlayer(SKAnimation animation, Action<bool> onSeek) : base(UIRuntime.CurrentActivity)
+                => Controller = new(animation, Invalidate, onSeek);
+
+            public void Play() => Controller.Play();
+
+            public void Pause() => Controller.Pause();
+
+            public void Resume() => Controller.Resume();
+
+            public void Stop() => Controller.Stop();
+
+            protected override void OnPaintSurface(SKPaintSurfaceEventArgs e)
+            {
+                base.OnPaintSurface(e);
+                Controller.Render(e.Surface.Canvas, e.Info.Rect);
+            }
+
+            protected override void Dispose(bool disposing)
+            {
+                base.Dispose(disposing);
+                Controller?.Dispose();
+                Controller = null;
+            }
         }
     }
 }
