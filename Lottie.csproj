@@ -6,7 +6,7 @@
     <RootNamespace>Zebble</RootNamespace>
     <PackageId>Zebble.Lottie</PackageId>
     <Product>$(AssemblyName) ($(TargetFramework))</Product>
-    <Version>2.0.1.0</Version>
+    <Version>2.0.2.0</Version>
     <PackOnBuild>true</PackOnBuild>
     <NeutralLanguage>en</NeutralLanguage>
     <DefineConstants>$(DefineConstants)</DefineConstants>
@@ -60,7 +60,7 @@
   <ItemGroup>
     <PackageReference Include="SkiaSharp.Views" Version="2.88.8" />
     <PackageReference Include="Zebble" Version="5.0.20" />
-    <PackageReference Include="SkiaSharp.Skottie" Version="3.0.0-preview.3.1" />
+    <PackageReference Include="SkiaSharp.Skottie" Version="2.88.8" />
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="update-local-nuget-cache $(TargetDir)" />

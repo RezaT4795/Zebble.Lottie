@@ -7,7 +7,7 @@
 
     class LottieAnimationController
     {
-        static readonly TimeSpan Interval = Zebble.Animation.OneFrame * 2;
+        static readonly TimeSpan Interval = Animation.OneFrame * 2;
         readonly object RenderLock = new();
 
         readonly SKAnimation SKAnimation;
