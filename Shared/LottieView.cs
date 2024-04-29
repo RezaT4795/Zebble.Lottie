@@ -1,6 +1,9 @@
 ﻿namespace Zebble
 {
-    using Zebble.Device;
+    using Olive;
+    using SkiaSharp;
+    using System;
+    using System.Text;
     using SKAnimation = SkiaSharp.Skottie.Animation;
 
 #if ANDROID
@@ -13,14 +16,28 @@
         internal AsyncEvent OnResume = new();
         internal SKAnimation Animation;
 
-        public string AnimationJsonFile { set => Animation = SKAnimation.Create(IO.File(value).FullName); }
-
-        public string AnimationJsonString { set => Animation = SKAnimation.Parse(value); }
+        public string Data
+        {
+            set
+            {
+                var data = SKData.CreateCopy(value.ToBytes(Encoding.ASCII));
+                Animation = SKAnimation.Create(data);
+            }
+        }
 
         public bool Loop { get; set; } = true;
 
         public void Pause() => OnPause.RaiseOn(Thread.UI);
         public void Play() => OnPlay.RaiseOn(Thread.UI);
         public void Resume() => OnResume.RaiseOn(Thread.UI);
+    }
+
+    public static class LottieViewExtensions
+    {
+        public static TView Data<TView>(this TView @this, string value) where TView : LottieView
+            => @this.Set(x => x.Data = value);
+
+        public static TView Loop<TView>(this TView @this, bool value = true) where TView : LottieView
+            => @this.Set(x => x.Loop = value);
     }
 }
