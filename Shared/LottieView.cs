@@ -20,7 +20,8 @@
         {
             set
             {
-                var data = SKData.CreateCopy(value.ToBytes(Encoding.ASCII));
+                var bytes = value.ToBytes(Encoding.ASCII);
+                var data = SKData.CreateCopy(bytes, (ulong)(bytes.Length + 1));
                 Animation = SKAnimation.Create(data);
             }
         }

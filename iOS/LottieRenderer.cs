@@ -6,6 +6,7 @@
     using SkiaSharp.Views.iOS;
     using SKAnimation = SkiaSharp.Skottie.Animation;
     using System;
+    using UIKit;
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     class LottieRenderer : INativeRenderer
@@ -50,7 +51,10 @@
             LottieAnimationController Controller;
 
             public LottiePlayer(SKAnimation animation, Action<bool> onSeek)
-                => Controller = new(animation, SetNeedsDisplay, onSeek);
+            {
+                Controller = new(animation, SetNeedsDisplay, onSeek);
+                ContentMode = UIViewContentMode.ScaleAspectFit;
+            }
 
             public void Play() => Controller.Play();
 
