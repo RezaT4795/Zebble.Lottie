@@ -2,6 +2,7 @@
 {
     using Olive;
     using SkiaSharp;
+    using SkiaSharp.Resources;
     using System;
     using System.Text;
     using SKAnimation = SkiaSharp.Skottie.Animation;
@@ -20,8 +21,11 @@
         {
             set
             {
+                var builder = SKAnimation.CreateBuilder()
+			        .SetResourceProvider(new CachingResourceProvider(new DataUriResourceProvider()))
+			        .SetFontManager(SKFontManager.Default);
                 var data = SKData.CreateCopy(value.ToBytes(Encoding.ASCII));
-                Animation = SKAnimation.Create(data);
+                Animation = builder.Build(data);
             }
         }
 
