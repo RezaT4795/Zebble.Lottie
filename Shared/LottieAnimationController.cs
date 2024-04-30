@@ -4,6 +4,7 @@
     using System;
     using SKAnimation = SkiaSharp.Skottie.Animation;
     using SkiaSharp;
+    using Olive;
 
     class LottieAnimationController
     {
@@ -11,18 +12,21 @@
         readonly object RenderLock = new();
 
         readonly SKAnimation SKAnimation;
+        readonly int MaxFrames;
         readonly Action OnInvalidate;
-        readonly Action<bool> OnSeek;
+        readonly Action OnFinished;
 
-        int CurrentFrame = -1;
-        TimeSpan CurrentPosition => Interval * CurrentFrame;
+        int CurrentFrame = 0;
         Timer Timer;
 
-        public LottieAnimationController(SKAnimation animation, Action onInvalidate, Action<bool> onSeek)
+        public LottieAnimationController(SKAnimation animation, Action onInvalidate, Action onFinished)
         {
             SKAnimation = animation;
+            MaxFrames = (int)(animation.Duration / Interval).LimitMin(0);
             OnInvalidate = onInvalidate;
-            OnSeek = onSeek;
+            OnFinished = onFinished;
+
+            SKAnimation.SeekFrame(0);
 
             Timer = new Timer(Interval.TotalMilliseconds);
             Timer.Elapsed += TimerOnElapsed;
@@ -30,7 +34,7 @@
 
         public void Play()
         {
-            CurrentFrame = -1;
+            CurrentFrame = 0;
             Timer.Start();
         }
 
@@ -41,24 +45,26 @@
         public void Stop()
         {
             Timer.Stop();
-            CurrentFrame = -1;
+            CurrentFrame = 0;
         }
 
         void TimerOnElapsed(object sender, ElapsedEventArgs e)
         {
             lock (RenderLock)
             {
-                CurrentFrame++;
+                var isFinished = CurrentFrame > MaxFrames;
 
-                var isFinished = CurrentPosition >= SKAnimation.Duration;
-
-                if (isFinished == false)
+                if (isFinished)
                 {
-                    SKAnimation.SeekFrame(CurrentFrame);
-                    OnInvalidate();
+                    Stop();
+                    OnFinished();
+                    return;
                 }
 
-                OnSeek(isFinished);
+                    SKAnimation.SeekFrame(CurrentFrame);
+                Thread.UI.RunAction(OnInvalidate);
+
+                CurrentFrame++;
             }
         }
 

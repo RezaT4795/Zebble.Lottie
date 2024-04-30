@@ -1,12 +1,12 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras/3.0.44">
   <PropertyGroup>
-    <TargetFrameworks>Xamarin.iOS10;MonoAndroid13.0;net8.0-android;net8.0-ios</TargetFrameworks>
+    <TargetFrameworks>net8.0-android;net8.0-ios</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);uap10.0.18362</TargetFrameworks>
     <AssemblyName>Zebble.Lottie</AssemblyName>
     <RootNamespace>Zebble</RootNamespace>
     <PackageId>Zebble.Lottie</PackageId>
     <Product>$(AssemblyName) ($(TargetFramework))</Product>
-    <Version>2.0.6.0</Version>
+    <Version>2.0.8.0</Version>
     <PackOnBuild>true</PackOnBuild>
     <NeutralLanguage>en</NeutralLanguage>
     <DefineConstants>$(DefineConstants)</DefineConstants>
@@ -43,12 +43,15 @@
     <Compile Include="Shared\**\*.cs" />
   </ItemGroup>
   <ItemGroup Condition=" $(DefineConstants.Contains('UWP')) ">
+    <PackageReference Include="SkiaSharp.Views" Version="2.88.8" />
     <Compile Include="UWP\**\*.cs" />
   </ItemGroup>
   <ItemGroup Condition=" $(DefineConstants.Contains('ANDROID')) ">
+    <PackageReference Include="SkiaSharp.Views" Version="3.0.0-preview.3.1" />
     <Compile Include="Android\**\*.cs" />
   </ItemGroup>
   <ItemGroup Condition=" $(DefineConstants.Contains('IOS')) ">
+    <PackageReference Include="SkiaSharp.Views" Version="3.0.0-preview.3.1" />
     <Compile Include="iOS\**\*.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -58,7 +61,6 @@
     <None Remove="Zebble-LicenseAgreement.txt" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="SkiaSharp.Views" Version="2.88.8" />
     <PackageReference Include="Zebble" Version="5.0.20" />
     <PackageReference Include="SkiaSharp.Skottie" Version="3.0.0-preview.3.1" />
   </ItemGroup>

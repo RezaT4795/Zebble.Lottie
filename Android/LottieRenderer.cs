@@ -10,37 +10,33 @@
     [EditorBrowsable(EditorBrowsableState.Never)]
     class LottieRenderer : INativeRenderer
     {
-        SKAnimation Animation;
+        readonly SKAnimation Animation;
+
         LottiePlayer Player;
         LottieView View;
 
         public Task<PlatformView> Render(Renderer renderer)
         {
             View = (LottieView)renderer.View;
-            Player = new LottiePlayer(View.Animation, OnSeek);
+            Player = new LottiePlayer(View.Animation, OnFinished);
 
-            View.OnPlay.Handle(() => Player.Play());
-            View.OnPause.Handle(() => Player.Pause());
-            View.OnResume.Handle(() => Player.Resume());
+            View.OnPlay.Handle(Player.Play);
+            View.OnPause.Handle(Player.Pause);
+            View.OnResume.Handle(Player.Resume);
+            View.OnStop.Handle(Player.Stop);
 
             Player.Play();
 
             return Task.FromResult<PlatformView>(Player);
         }
-
-        void OnSeek(bool animationFinished)
+        
+        void OnFinished()
         {
-            if (animationFinished == false) return;
-
             if (View.Loop) Player.Play();
-            else Player.Stop();
         }
 
         public void Dispose()
         {
-            Animation?.Dispose();
-            Animation = null;
-
             Player?.Dispose();
             Player = null;
         }
@@ -49,8 +45,8 @@
         {
             LottieAnimationController Controller;
 
-            public LottiePlayer(SKAnimation animation, Action<bool> onSeek) : base(UIRuntime.CurrentActivity)
-                => Controller = new(animation, Invalidate, onSeek);
+            public LottiePlayer(SKAnimation animation, Action onFinished) : base(UIRuntime.CurrentActivity)
+                => Controller = new(animation, Invalidate, onFinished);
 
             public void Play() => Controller.Play();
 
