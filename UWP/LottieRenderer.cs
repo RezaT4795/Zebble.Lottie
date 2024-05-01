@@ -4,21 +4,18 @@
     using System.Threading.Tasks;
     using PlatformView = Windows.UI.Xaml.FrameworkElement;
     using SkiaSharp.Views.UWP;
-    using SKAnimation = SkiaSharp.Skottie.Animation;
     using System;
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     class LottieRenderer : INativeRenderer
     {
-        readonly SKAnimation Animation;
-
         LottiePlayer Player;
         LottieView View;
 
         public Task<PlatformView> Render(Renderer renderer)
         {
             View = (LottieView)renderer.View;
-            Player = new LottiePlayer(View.Animation, OnFinished);
+            Player = new LottiePlayer(View.Data, OnFinished);
 
             View.OnPlay.Handle(Player.Play);
             View.OnPause.Handle(Player.Pause);
@@ -45,8 +42,8 @@
         {
             LottieAnimationController Controller;
 
-            public LottiePlayer(SKAnimation animation, Action onFinished)
-                => Controller = new(animation, Invalidate, onFinished);
+            public LottiePlayer(string data, Action onFinished)
+                => Controller = new(data, Invalidate, onFinished);
 
             public void Play() => Controller.Play();
 

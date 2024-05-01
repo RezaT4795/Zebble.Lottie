@@ -1,13 +1,8 @@
 ﻿namespace Zebble
 {
-    using Olive;
-    using SkiaSharp;
-    using SkiaSharp.Resources;
     using System;
-    using System.Text;
     using System.Threading.Tasks;
     using Zebble.Device;
-    using SKAnimation = SkiaSharp.Skottie.Animation;
 
 #if ANDROID
     [Android.Runtime.Preserve]
@@ -19,19 +14,7 @@
         internal readonly AsyncEvent OnResume = new();
         internal readonly AsyncEvent OnStop = new();
 
-        internal SKAnimation Animation;
-
-        public string Data
-        {
-            set
-            {
-                var builder = SKAnimation.CreateBuilder()
-                    .SetResourceProvider(new CachingResourceProvider(new DataUriResourceProvider()))
-                    .SetFontManager(SKFontManager.Default);
-                var data = SKData.CreateCopy(value.ToBytes(Encoding.ASCII));
-                Animation = builder.Build(data);
-            }
-        }
+        public string Data { get; set; }
 
         public override async Task OnInitializing()
         {
@@ -45,9 +28,6 @@
         {
             App.Started -= Play;
             App.WentIntoBackground -= Pause;
-
-            Animation?.Dispose();
-            Animation = null;
 
             base.Dispose();
         }

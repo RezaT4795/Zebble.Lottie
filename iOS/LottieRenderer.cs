@@ -4,22 +4,19 @@
     using System.Threading.Tasks;
     using PlatformView = UIKit.UIView;
     using SkiaSharp.Views.iOS;
-    using SKAnimation = SkiaSharp.Skottie.Animation;
     using System;
     using UIKit;
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     class LottieRenderer : INativeRenderer
     {
-        readonly SKAnimation Animation;
-
         LottiePlayer Player;
         LottieView View;
 
         public Task<PlatformView> Render(Renderer renderer)
         {
             View = (LottieView)renderer.View;
-            Player = new LottiePlayer(View.Animation, OnFinished);
+            Player = new LottiePlayer(View.Data, OnFinished);
 
             View.OnPlay.Handle(Player.Play);
             View.OnPause.Handle(Player.Pause);
@@ -46,9 +43,9 @@
         {
             LottieAnimationController Controller;
 
-            public LottiePlayer(SKAnimation animation, Action onFinished)
+            public LottiePlayer(string data, Action onFinished)
             {
-                Controller = new(animation, SetNeedsLayout, onFinished);
+                Controller = new(data, SetNeedsLayout, onFinished);
                 ContentMode = UIViewContentMode.ScaleAspectFit;
                 BackgroundColor = Colors.Transparent.Render();
             }

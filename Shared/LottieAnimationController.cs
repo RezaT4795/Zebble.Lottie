@@ -5,31 +5,41 @@
     using SKAnimation = SkiaSharp.Skottie.Animation;
     using SkiaSharp;
     using Olive;
+    using SkiaSharp.Resources;
+    using System.Text;
 
     class LottieAnimationController
     {
         static readonly TimeSpan Interval = Animation.OneFrame * 2;
         readonly object RenderLock = new();
 
-        readonly SKAnimation SKAnimation;
         readonly int MaxFrames;
         readonly Action OnInvalidate;
         readonly Action OnFinished;
 
         int CurrentFrame = 0;
+        SKAnimation SKAnimation;
         Timer Timer;
 
-        public LottieAnimationController(SKAnimation animation, Action onInvalidate, Action onFinished)
+        public LottieAnimationController(string data, Action onInvalidate, Action onFinished)
         {
-            SKAnimation = animation;
-            MaxFrames = (int)(animation.Duration / Interval).LimitMin(0);
+            SKAnimation = CreateSKAnimation(data);
+            MaxFrames = (int)(SKAnimation.Duration / Interval).LimitMin(0);
             OnInvalidate = onInvalidate;
             OnFinished = onFinished;
-
+            
             SKAnimation.SeekFrame(0);
 
             Timer = new Timer(Interval.TotalMilliseconds);
             Timer.Elapsed += TimerOnElapsed;
+        }
+
+        static SKAnimation CreateSKAnimation(string data)
+        {
+            return SKAnimation.CreateBuilder()
+                .SetResourceProvider(new CachingResourceProvider(new DataUriResourceProvider()))
+                .SetFontManager(SKFontManager.Default)
+                .Build(SKData.CreateCopy(data.ToBytes(Encoding.ASCII)));
         }
 
         public void Play()
@@ -61,7 +71,8 @@
                     return;
                 }
 
-                    SKAnimation.SeekFrame(CurrentFrame);
+                SKAnimation?.SeekFrame(CurrentFrame);
+
                 Thread.UI.RunAction(OnInvalidate);
 
                 CurrentFrame++;
@@ -71,13 +82,16 @@
         public void Render(SKCanvas canvas, SKRect rect)
         {
             canvas.Clear();
-            SKAnimation.Render(canvas, rect);
+            SKAnimation?.Render(canvas, rect);
         }
 
         public void Dispose()
         {
             Timer?.Dispose();
             Timer = null;
+
+            SKAnimation?.Dispose();
+            SKAnimation = null;
         }
     }
 }
