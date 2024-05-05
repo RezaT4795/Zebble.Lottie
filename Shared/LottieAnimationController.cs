@@ -20,6 +20,7 @@
         int CurrentFrame = 0;
         SKAnimation SKAnimation;
         Timer Timer;
+        bool IsDisposed;
 
         public LottieAnimationController(string data, Action onInvalidate, Action onFinished)
         {
@@ -27,7 +28,7 @@
             MaxFrames = (int)(SKAnimation.Duration / Interval).LimitMin(0);
             OnInvalidate = onInvalidate;
             OnFinished = onFinished;
-            
+
             SKAnimation.SeekFrame(0);
 
             Timer = new Timer(Interval.TotalMilliseconds);
@@ -45,21 +46,23 @@
         public void Play()
         {
             CurrentFrame = 0;
-            Timer.Start();
+            Timer?.Start();
         }
 
-        public void Pause() => Timer.Stop();
+        public void Pause() => Timer?.Stop();
 
-        public void Resume() => Timer.Start();
+        public void Resume() => Timer?.Start();
 
         public void Stop()
         {
-            Timer.Stop();
+            Timer?.Stop();
             CurrentFrame = 0;
         }
 
         void TimerOnElapsed(object sender, ElapsedEventArgs e)
         {
+            if (IsDisposed) return;
+
             lock (RenderLock)
             {
                 var isFinished = CurrentFrame > MaxFrames;
@@ -73,7 +76,13 @@
 
                 SKAnimation?.SeekFrame(CurrentFrame);
 
-                Thread.UI.RunAction(OnInvalidate);
+                if (IsDisposed) return;
+
+                Thread.UI.RunAction(() =>
+                {
+                    try { OnInvalidate(); }
+                    catch (ObjectDisposedException ex) { }
+                });
 
                 CurrentFrame++;
             }
@@ -87,6 +96,8 @@
 
         public void Dispose()
         {
+            IsDisposed = true;
+
             Timer?.Dispose();
             Timer = null;
 

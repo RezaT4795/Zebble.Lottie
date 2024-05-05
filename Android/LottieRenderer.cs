@@ -11,6 +11,7 @@
     {
         LottiePlayer Player;
         LottieView View;
+        bool IsDisposed;
 
         public Task<PlatformView> Render(Renderer renderer)
         {
@@ -29,11 +30,13 @@
         
         void OnFinished()
         {
+            if (IsDisposed) return;
             if (View.Loop) Player.Play();
         }
 
         public void Dispose()
         {
+            IsDisposed = true;
             Player?.Dispose();
             Player = null;
         }
