@@ -5,6 +5,7 @@
     using PlatformView = Android.Views.View;
     using SkiaSharp.Views.Android;
     using System;
+    using Android.Graphics;
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     class LottieRenderer : INativeRenderer
@@ -46,7 +47,11 @@
             LottieAnimationController Controller;
 
             public LottiePlayer(string data, Action onFinished) : base(UIRuntime.CurrentActivity)
-                => Controller = new(data, Invalidate, onFinished);
+            {
+                Controller = new(data, Invalidate, onFinished);
+                SetZOrderOnTop(true);
+                Holder.SetFormat(Format.Rgba8888);
+            }
 
             public void Play() => Controller.Play();
 
