@@ -27,7 +27,7 @@
 
             return Task.FromResult<PlatformView>(Player);
         }
-        
+
         void OnFinished()
         {
             if (IsDisposed) return;
@@ -41,7 +41,7 @@
             Player = null;
         }
 
-        class LottiePlayer : SKCanvasView
+        class LottiePlayer : SKGLSurfaceView
         {
             LottieAnimationController Controller;
 
@@ -56,7 +56,7 @@
 
             public void Stop() => Controller.Stop();
 
-            protected override void OnPaintSurface(SKPaintSurfaceEventArgs e)
+            protected override void OnPaintSurface(SKPaintGLSurfaceEventArgs e)
             {
                 base.OnPaintSurface(e);
                 Controller.Render(e.Surface.Canvas, e.Info.Rect);

@@ -42,7 +42,7 @@
             Player = null;
         }
 
-        class LottiePlayer : SKCanvasView
+        class LottiePlayer : SKMetalView
         {
             LottieAnimationController Controller;
 
@@ -61,7 +61,7 @@
 
             public void Stop() => Controller.Stop();
 
-            protected override void OnPaintSurface(SKPaintSurfaceEventArgs e)
+            protected override void OnPaintSurface(SKPaintMetalSurfaceEventArgs e)
             {
                 base.OnPaintSurface(e);
                 Controller.Render(e.Surface.Canvas, e.Info.Rect);
