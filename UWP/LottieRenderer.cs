@@ -28,10 +28,15 @@
             return Task.FromResult<PlatformView>(Player);
         }
 
-        void OnFinished()
+        async void OnFinished()
         {
             if (IsDisposed) return;
-            if (View.Loop) Player.Play();
+            if (View.Loop)
+            {
+                while (View?.IsVisibleOnScreen() != true)
+                    await Task.Delay(100);
+                Player.Play();
+            }
         }
 
         public void Dispose()
