@@ -42,16 +42,12 @@
             Player = null;
         }
 
-        class LottiePlayer : SKGLSurfaceView
+        class LottiePlayer : SKCanvasView
         {
             LottieAnimationController Controller;
 
             public LottiePlayer(string data, Action onFinished) : base(UIRuntime.CurrentActivity)
-            {
-                Controller = new(data, Invalidate, onFinished);
-                SetZOrderOnTop(true);
-                Holder.SetFormat(Format.Rgba8888);
-            }
+                => Controller = new(data, Invalidate, onFinished);
 
             public void Play() => Controller.Play();
 
@@ -61,7 +57,7 @@
 
             public void Stop() => Controller.Stop();
 
-            protected override void OnPaintSurface(SKPaintGLSurfaceEventArgs e)
+            protected override void OnPaintSurface(SKPaintSurfaceEventArgs e)
             {
                 base.OnPaintSurface(e);
                 Controller.Render(e.Surface.Canvas, e.Info.Rect);

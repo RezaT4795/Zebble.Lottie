@@ -65,6 +65,8 @@
 
             lock (RenderLock)
             {
+                if (IsDisposed) return;
+
                 var isFinished = CurrentFrame > MaxFrames;
 
                 if (isFinished)
@@ -74,7 +76,8 @@
                     return;
                 }
 
-                SKAnimation?.SeekFrame(CurrentFrame);
+                try { SKAnimation?.SeekFrame(CurrentFrame); }
+                catch { }
 
                 if (IsDisposed) return;
 
