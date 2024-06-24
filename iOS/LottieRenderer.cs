@@ -1,4 +1,4 @@
-﻿    namespace Zebble
+﻿namespace Zebble
 {
     using System.ComponentModel;
     using System.Threading.Tasks;
@@ -49,32 +49,40 @@
 
         class LottiePlayer : SKCanvasView
         {
+            bool IsDisposed;
             LottieAnimationController Controller;
 
             public LottiePlayer(string data, Action onFinished)
             {
-                Controller = new(data, SetNeedsLayout, onFinished);
+                Controller = new(data, OnInvalidate, onFinished);
                 ContentMode = UIViewContentMode.ScaleAspectFit;
                 BackgroundColor = Colors.Transparent.Render();
             }
 
-            public void Play() => Controller.Play();
+            void OnInvalidate()
+            {
+                if (IsDisposed) return;
+                SetNeedsLayout();
+            }
 
-            public void Pause() => Controller.Pause();
+            public void Play() => Controller?.Play();
 
-            public void Resume() => Controller.Resume();
+            public void Pause() => Controller?.Pause();
 
-            public void Stop() => Controller.Stop();
+            public void Resume() => Controller?.Resume();
+
+            public void Stop() => Controller?.Stop();
 
             protected override void OnPaintSurface(SKPaintSurfaceEventArgs e)
             {
                 base.OnPaintSurface(e);
-                Controller.Render(e.Surface.Canvas, e.Info.Rect);
+                Controller?.Render(e.Surface.Canvas, e.Info.Rect);
             }
 
             protected override void Dispose(bool disposing)
             {
                 base.Dispose(disposing);
+                IsDisposed = true;
                 Controller?.Dispose();
                 Controller = null;
             }

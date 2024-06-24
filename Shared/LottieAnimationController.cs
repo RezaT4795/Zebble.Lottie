@@ -84,7 +84,7 @@
                 Thread.UI.RunAction(() =>
                 {
                     try { OnInvalidate(); }
-                    catch (ObjectDisposedException ex) { }
+                    catch (ObjectDisposedException) { }
                 });
 
                 CurrentFrame++;

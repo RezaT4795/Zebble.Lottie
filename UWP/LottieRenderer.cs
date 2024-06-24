@@ -48,27 +48,35 @@
 
         class LottiePlayer : SKXamlCanvas
         {
+            bool IsDisposed;
             LottieAnimationController Controller;
 
             public LottiePlayer(string data, Action onFinished)
-                => Controller = new(data, Invalidate, onFinished);
+                => Controller = new(data, OnInvalidate, onFinished);
 
-            public void Play() => Controller.Play();
+            void OnInvalidate()
+            {
+                if (IsDisposed) return;
+                Invalidate();
+            }
 
-            public void Pause() => Controller.Pause();
+            public void Play() => Controller?.Play();
 
-            public void Resume() => Controller.Resume();
+            public void Pause() => Controller?.Pause();
 
-            public void Stop() => Controller.Stop();
+            public void Resume() => Controller?.Resume();
+
+            public void Stop() => Controller?.Stop();
 
             protected override void OnPaintSurface(SKPaintSurfaceEventArgs e)
             {
                 base.OnPaintSurface(e);
-                Controller.Render(e.Surface.Canvas, e.Info.Rect);
+                Controller?.Render(e.Surface.Canvas, e.Info.Rect);
             }
 
             public void Dispose()
             {
+                IsDisposed = true;
                 Controller?.Dispose();
                 Controller = null;
             }
