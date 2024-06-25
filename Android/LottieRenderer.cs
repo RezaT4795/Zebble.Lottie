@@ -5,6 +5,7 @@
     using PlatformView = Android.Views.View;
     using SkiaSharp.Views.Android;
     using System;
+    using Android.Runtime;
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     class LottieRenderer : INativeRenderer
@@ -53,6 +54,9 @@
 
             public LottiePlayer(string data, Action onFinished) : base(UIRuntime.CurrentActivity)
                 => Controller = new(data, OnInvalidate, onFinished);
+
+            [Preserve]
+            public LottiePlayer(IntPtr ptr, JniHandleOwnership handle) : base(ptr, handle) { }
 
             void OnInvalidate()
             {
