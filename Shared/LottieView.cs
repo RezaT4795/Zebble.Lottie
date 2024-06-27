@@ -22,12 +22,14 @@
 
             App.Started += Play;
             App.WentIntoBackground += Pause;
+            App.Stopping += Stop;
         }
 
         public override void Dispose()
         {
             App.Started -= Play;
             App.WentIntoBackground -= Pause;
+            App.Stopping -= Stop;
 
             base.Dispose();
         }

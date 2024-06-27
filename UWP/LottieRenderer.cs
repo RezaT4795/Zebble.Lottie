@@ -34,7 +34,11 @@
             if (View.Loop)
             {
                 while (View?.IsVisibleOnScreen() != true)
+                {
+                    if (View?.IsDisposed ?? true) return;
                     await Task.Delay(100);
+                }
+
                 Player.Play();
             }
         }
