@@ -49,6 +49,8 @@
             IsDisposed = true;
             Player?.Dispose();
             Player = null;
+			
+			GC.SuppressFinalize(this);
         }
 
         class LottiePlayer : SKCanvasView

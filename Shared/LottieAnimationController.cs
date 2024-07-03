@@ -106,6 +106,8 @@
 
             SKAnimation?.Dispose();
             SKAnimation = null;
+			
+			GC.SuppressFinalize(this);
         }
     }
 }

@@ -48,6 +48,8 @@
             IsDisposed = true;
             Player?.Dispose();
             Player = null;
+
+			GC.SuppressFinalize(this);
         }
 
         class LottiePlayer : SKXamlCanvas
@@ -83,6 +85,7 @@
                 IsDisposed = true;
                 Controller?.Dispose();
                 Controller = null;
+				GC.SuppressFinalize(this);
             }
         }
     }
