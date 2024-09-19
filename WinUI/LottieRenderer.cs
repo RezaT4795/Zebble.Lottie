@@ -2,8 +2,8 @@
 {
     using System.ComponentModel;
     using System.Threading.Tasks;
-    using PlatformView = Windows.UI.Xaml.FrameworkElement;
-    using SkiaSharp.Views.UWP;
+    using PlatformView = Microsoft.UI.Xaml.FrameworkElement;
+    using SkiaSharp.Views.Windows;
     using System;
 
     [EditorBrowsable(EditorBrowsableState.Never)]
