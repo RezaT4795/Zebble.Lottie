@@ -76,18 +76,18 @@
                     return;
                 }
 
-                try { SKAnimation?.SeekFrame(CurrentFrame); }
-                catch { }
-
-                if (IsDisposed) return;
-
                 Thread.UI.RunAction(() =>
                 {
+                    try { SKAnimation?.SeekFrame(CurrentFrame); }
+                    catch { }
+
+                    if (IsDisposed) return;
+
                     try { OnInvalidate(); }
                     catch (ObjectDisposedException) { }
-                });
 
-                CurrentFrame++;
+                    CurrentFrame++;
+                });
             }
         }
 
@@ -106,8 +106,8 @@
 
             SKAnimation?.Dispose();
             SKAnimation = null;
-			
-			GC.SuppressFinalize(this);
+
+            GC.SuppressFinalize(this);
         }
     }
 }
